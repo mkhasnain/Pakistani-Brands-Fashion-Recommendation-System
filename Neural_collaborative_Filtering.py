@@ -79,3 +79,25 @@ embedding_dim = 32
 model = NCF(num_users, num_items, embedding_dim)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Training loop
+num_epochs = 10
+
+for epoch in range(num_epochs):
+    model.train()
+    total_loss = 0
+    for user_ids, item_ids, ratings in data_loader:
+        user_ids = user_ids.long()
+        item_ids = item_ids.long()
+        ratings = ratings.float()
+        
+        optimizer.zero_grad()
+        outputs = model(user_ids, item_ids)
+        loss = criterion(outputs, ratings)
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item()
+    
+    avg_loss = total_loss / len(data_loader)
+    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
