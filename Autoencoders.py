@@ -58,3 +58,26 @@ for epoch in range(num_epochs):
 
     avg_loss = total_loss / len(data_loader)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
+
+
+def recommend_for_user_autoencoder(user_id, num_recommendations=5):
+    autoencoder.eval()
+    user_ratings = torch.FloatTensor(interaction_dataset.user_item_matrix[user_id]).unsqueeze(0)
+    
+    with torch.no_grad():
+        decoded_ratings = autoencoder(user_ratings)
+    
+    decoded_ratings = decoded_ratings.numpy().flatten()
+    top_item_indices = decoded_ratings.argsort()[-num_recommendations:][::-1]
+    recommended_items = df.iloc[top_item_indices].copy()
+    
+    # Inverse transform the categorical columns
+    for column in label_encoders:
+        recommended_items[column] = label_encoders[column].inverse_transform(recommended_items[column])
+    
+    return recommended_items
+
+# Example usage: Get 5 recommendations for user 0
+recommendations = recommend_for_user_autoencoder(0, 5)
+print(recommendations)
+
