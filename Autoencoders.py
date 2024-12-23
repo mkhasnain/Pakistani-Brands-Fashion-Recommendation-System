@@ -43,3 +43,18 @@ autoencoder = Autoencoder(num_items, encoding_dim=32)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(autoencoder.parameters(), lr=0.001)
 
+num_epochs = 20
+
+for epoch in range(num_epochs):
+    autoencoder.train()
+    total_loss = 0
+    for user_ratings in data_loader:
+        optimizer.zero_grad()
+        outputs = autoencoder(user_ratings)
+        loss = criterion(outputs, user_ratings)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(data_loader)
+    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
