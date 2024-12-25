@@ -29,3 +29,5 @@ class GCNRecommendationModel(torch.nn.Module):
         x = F.relu(x)
         x = self.conv2(x, edge_index, edge_weight)
         return x
+
+model = GCNRecommendationModel(in_channels=num_nodes, out_channels=32)
