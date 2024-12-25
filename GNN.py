@@ -16,3 +16,16 @@ node_features = torch.eye(num_nodes)
 edge_weight = torch.ones(edge_index.size(1))
 
 data = Data(x=node_features, edge_index=edge_index, edge_weight=edge_weight)
+
+class GCNRecommendationModel(torch.nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(GCNRecommendationModel, self).__init__()
+        self.conv1 = GCNConv(in_channels, 64)
+        self.conv2 = GCNConv(64, out_channels)
+
+    def forward(self, data):
+        x, edge_index, edge_weight = data.x, data.edge_index, data.edge_weight
+        x = self.conv1(x, edge_index, edge_weight)
+        x = F.relu(x)
+        x = self.conv2(x, edge_index, edge_weight)
+        return x
