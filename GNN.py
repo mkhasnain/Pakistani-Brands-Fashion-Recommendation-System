@@ -31,3 +31,22 @@ class GCNRecommendationModel(torch.nn.Module):
         return x
 
 model = GCNRecommendationModel(in_channels=num_nodes, out_channels=32)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+criterion = torch.nn.MSELoss()
+
+def train():
+    model.train()
+    optimizer.zero_grad()
+    out = model(data)
+    user_item_preds = out[interactions_df['user_id']] @ out[interactions_df['item_id']].t()
+    loss = criterion(user_item_preds.flatten(), torch.FloatTensor(interactions_df['rating']))
+    loss.backward()
+    optimizer.step()
+    return loss.item()
+
+# Training loop
+num_epochs = 20
+for epoch in range(num_epochs):
+    loss = train()
+    print(f'Epoch {epoch+1}, Loss: {loss:.4f}')
