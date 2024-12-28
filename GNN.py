@@ -50,3 +50,26 @@ num_epochs = 20
 for epoch in range(num_epochs):
     loss = train()
     print(f'Epoch {epoch+1}, Loss: {loss:.4f}')
+
+def recommend_for_user_gcn(user_id, num_recommendations=5):
+    model.eval()
+    with torch.no_grad():
+        out = model(data)
+    
+    user_embedding = out[user_id].unsqueeze(0)
+    item_embeddings = out[num_users:num_users + num_items]
+    
+    scores = user_embedding @ item_embeddings.t()
+    scores = scores.squeeze().numpy()
+    top_item_indices = scores.argsort()[-num_recommendations:][::-1]
+    recommended_items = df.iloc[top_item_indices].copy()
+    
+    # Inverse transform the categorical columns
+    for column in label_encoders:
+        recommended_items[column] = label_encoders[column].inverse_transform(recommended_items[column])
+    
+    return recommended_items
+
+# Example usage: Get 5 recommendations for user 0
+recommendations = recommend_for_user_gcn(0, 5)
+print(recommendations)
